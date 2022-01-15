@@ -1,0 +1,19 @@
+{
+  "name": "nodejshcode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE.git"
+  },
+  "author": "Hcode",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE/issues"
+  },
+  "homepage": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE#readme"
+}
