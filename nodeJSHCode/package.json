@@ -1,22 +1,15 @@
 {
-  "name": "nodejshcode",
+  "name": "restful",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE.git"
-  },
-  "author": "Hcode",
+  "author": "Hcode Treinamentos",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE/issues"
-  },
-  "homepage": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE#readme",
   "dependencies": {
-    "consign": "^0.1.6"
+    "consign": "^0.1.6",
+    "express": "^4.17.1"
   }
 }
