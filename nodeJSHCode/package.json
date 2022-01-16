@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE/issues"
   },
-  "homepage": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE#readme"
+  "homepage": "https://github.com/Gustavo8182/PROJETOS-CURSO-JS-HCODE#readme",
+  "dependencies": {
+    "consign": "^0.1.6"
+  }
 }

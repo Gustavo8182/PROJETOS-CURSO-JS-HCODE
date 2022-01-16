@@ -1,32 +1,14 @@
-const http = require("http");
+const express = require('express');
+let routesIndex = require('./routes/index');
+let routesUsers = require('./routes/users'); 
 
-let server = http.createServer((req,res)=>{
-    console.log('URL',req.url);
-    console.log('METHOD',req.method);
+let app = express();
 
-switch (req.url) {
-    case '/':
-        res.statusCode = 200;
-        res.setHeader("Content-Type","text/html");
-        res.end("<h>Olá</h>");
-        break;
+app.use('/', routesIndex);
+app.use('/users', routesUsers);
 
-    case '/users':
-        res.statusCode = 200;
-        res.setHeader("Content-Type","text/html");
-        res.end(JSON.stringify({
-            users : [{
-                name: 'Hcode',
-                email: 'contato@hcode.com',
-                id: 1            
-            }]
-        }));
-        break;
-}
+app.listen(3000, '127.0.0.1', ()=>{
 
-})
-
-server.listen(3000,'127.0.0.1',()=>{
     console.log('Serve Start');
 
-})
+});
