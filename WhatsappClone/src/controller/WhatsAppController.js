@@ -1,4 +1,11 @@
-class WhatsAppController{
+import {Format} from './../Util/Format';
+import {CameraController} from './CameraController';
+import {MicrophneController} from './MicrophneController';
+import { DocumentPreviewController } from './DocumentPreviewController';
+import { Firebase} from './../Util/Firebase';
+
+
+export  class WhatsAppController{
     constructor(){
         console.log("WhatsAppController teste")
         
@@ -152,18 +159,44 @@ class WhatsAppController{
             this.el.panelCamera.addClass('open');
             this.el.panelCamera.css({
                 'heigth':'calc(100% - 120px)'
-            })         
+            })  
+            
+            this. _camera = new CameraController(this.el.videoCamera);
+
         });// close btnAttachCamera
 
         this.el.btnClosePanelCamera.on('click', e=>{
             this.closseAllMainPanel();
             this.el.panelMessagesContainer.show();
+            this._camera.stop();
         });// close btnClosePanelCamera
 
 
         this.el.btnTakePicture.on('click', e=>{
-            console.log('takePicture'); 
+            let dataUrl = this._camera.takePicture();
+
+            this.el.pictureCamera.src = dataUrl;
+            this.el.pictureCamera.show();
+            this.el.videoCamera.hide();
+            this.el.btnReshootPanelCamera.show();
+            this.el.containerSendPicture.hide();
+            this.el.containerSendPicture.show();
+
+
         });// close btnTakePicture
+
+        this.el.btnReshootPanelCamera.on('click',e=>{
+
+            this.el.pictureCamera.hide();
+            this.el.videoCamera.show();
+            this.el.btnReshootPanelCamera.hide();
+            this.el.containerSendPicture.show();
+            this.el.containerSendPicture.hide();
+        })
+        this.el.btnSendPicture.on('click',e=>{
+            console.log(this.el.pictureCamera.src)
+
+        });//close btnReshootPanelCamera
 
         this.el.btnAttachDocument.on('click',e=>{
             this.closseAllMainPanel();
@@ -171,7 +204,37 @@ class WhatsAppController{
             this.el.panelDocumentPreview.css({
                 'heigth':'calc(100% - 120px)'
             });
+
+            this.el.inputDocument.click();
         });// close btnAttachDocument
+
+        this.el.inputDocument.on('change', e=>{            
+            if (this.el.inputDocument.files.length) {
+                let file = this.el.inputDocument.files[0];
+                this._documentPreviewController = new DocumentPreviewController(file);
+
+                this._documentPreviewController.getPreviewData().then(result=>{
+                    this.el.imgPanelDocumentPreview.src = result.src;
+                    this.el.infoPanelDocumentPreview.innerHTML = result.info;
+                    this.el.imagePanelDocumentPreview.show();
+                    this.el.filePanelDocumentPreview.hide();
+                    
+
+                }).catch (err =>{
+                    switch (file.type) {
+                        default:
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic';
+                            break;
+                    }
+                    this.el.filenamePanelDocumentPreview.innerHTML = file.name;
+                    this.el.imagePanelDocumentPreview.hide();
+                    this.el.filePanelDocumentPreview.show();
+                });
+                
+            }
+
+        });// close inputDocument
+
 
         this.el.btnClosePanelDocumentPreview.on('click', e =>{
             this.closseAllMainPanel();
@@ -196,33 +259,119 @@ class WhatsAppController{
         this.el.btnSendMicrophone.on('click', e=>{
             this.el.recordMicrophone.show();
             this.el.btnSendMicrophone.hide();
-            this.startRecordMicroPhoneTime();
+
+            this._microphoneController = new MicrophneController();
+            this._microphoneController.on('ready',audio=>{
+                this._microphoneController.startRecorder();
+            });
+
+            this._microphoneController.on('recordtime',timer=>{
+                this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer);
+            })
         });//closse btnSendMicrophone
 
         
         this.el.btnCancelMicrophone.on('click', e=>{
+
+            this._microphoneController.startRecorder();
             this.closeRecordMicrophone();
+            
+
         });//closse btnCancelMicrophone
 
         
         this.el.btnFinishMicrophone.on('click', e=>{
+            this._microphoneController.startRecorder();
             this.closeRecordMicrophone();
         });//closse btnFinishMicrophone
 
+        this.el.inputText.on('keypress', e=>{
+            if (e.key === 'Enter' && !e.ctrlKey) {
+                e.preventDefault();
+                this.el.btnSend.click();
+            }
+        });//close inputText keypress
+
+        this.el.inputText.on('keyup', e=>{
+            if (this.el.inputText.innerHTML.length){
+                this.el.inputPlaceholder.hide();
+                this.el.btnSendMicrophone.hide();
+                this.el.btnSend.show();
+            }else {
+                this.el.inputPlaceholder.show();                
+                this.el.btnSendMicrophone.show();
+                this.el.btnSend.hide();
+            };
+
+        })//close inputText keyup
+        
+        this.el.btnSend.on('click', e=>{
+            console.log(this.el.inputText.innerHTML);
+        });//close inputText send
+        
+        this.el.btnEmojis.on('click', e=>{
+            this.el.panelEmojis.toggleClass('open');
+        })//close panelEmojis open
+
+        this.el.panelEmojis.querySelectorAll('.emojik').forEach(emoji=>{
+            emoji.on('click', e=>{
+                //console.log(emoji.dataset.unicode);
+                let img = this.el.imgEmojiDefault.cloneNode();
+                img.style.cssText = emoji.style.cssText;
+                img.dataset.unicode = emoji.dataset.unicode;
+                img.alt = emoji.dataset.unicode;
+
+                emoji.classList.forEach(name =>
+                    img.classList.add(name));
+                
+                // tiramos o apendChild pois ele sempre add o emoji no fim do texto
+                //this.el.inputText.appendChild(img);
+
+                //vamos usar  window.getSelection para pegar o local do cursor
+                //verificar se esta dentro da caixa de msg se n tiver colocalo la
+                let cursor = window.getSelection();
+                if (!cursor.focusNode || !cursor.focusNode.id == "input-text" ) {
+                    this.el.inputText.focus();
+                    cursor = window.getSelection();                    
+                }
+
+                //aqui estamos colcoando os emotiosn exatamente onde esta o curso
+                let range = document.createRange();
+                range = cursor.getRangeAt(0);
+                range.deleteContents();
+
+                //criamos um fragmento para manipular a string
+                let frag = document.createDocumentFragment();
+                //inserimos o imojin dentro do frag
+                frag.appendChild(img);
+                //insere o emijin
+                range.insertNode(frag);
+                //curso vai pra depois do emijin
+                range.setStartAfter(img);
+                 
+                //dispatchEvent força que um evento aconteça
+                this.el.inputText.dispatchEvent(new Event('keyup'));
+            })
+        })//close Emojis Select emoji e insert 
+
+
+
+
+
     }//Close initEvents
 
+  /*Metodo trnafeirdo para a cassl microphonecontrole
     startRecordMicroPhoneTime(){
         let start = Date.now();
         this._recordMicroPhoneInterval = setInterval(() =>{
             this.el.recordMicrophoneTimer.innerHTML = Format.toTime(Date.now() - start);
         }, 100);
-    };// close startRecordMicroPhoneTime
+    };// close startRecordMicroPhoneTime*/
 
 
     closeRecordMicrophone(){
         this.el.recordMicrophone.hide();
-        this.el.btnSendMicrophone.show();        
-        clearInterval(this._recordMicroPhoneInterval);
+        this.el.btnSendMicrophone.show();                
     };//close closeRecordMicrophone
 
     closseAllMainPanel(){
