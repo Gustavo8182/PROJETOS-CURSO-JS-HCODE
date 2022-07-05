@@ -4,7 +4,7 @@ require('firebase/firestore');
 export class Firebase {
 
     constructor(){
-        this._confg  = {
+        this._config  = {
             apiKey: "AIzaSyAKPnMF6zqLGmRWLLvGIH2ITxKOJdr03BY",
             authDomain: "wpp-clone-br.firebaseapp.com",
             projectId: "wpp-clone-br",
@@ -18,22 +18,39 @@ export class Firebase {
     
         //metodo para inicializar o firebase
     init(){
-        if(!this._initialized){
-            firebase.initializeApp(this._confg);            
-            firebase.firestore().settngs({
-                timestampsInSnapshorts:true
-            })
-            this._initialized = true;
+        if(!window._initializedFirebase){
+            firebase.initializeApp(this._config);            
+            firebase.firestore().settings({
+                timestampsInSnapshots:true
+            });
+            window._initializedFirebase = true;
         }};//close init
 
         //metodo estatico para retona banco
-    static bd(){
+    static db(){
         return firebase.firestorage();
     }
     
         //metodo estatico para retona armazenamento na nuvem
     static hd(){
         return firebase.storage();
+    }
+
+    initAuth(){
+        return new Promise((s,f)=>{
+            // metodo que vai abrir um popo perguntando qual conta vamos usar; OBG habilitar noprojeto no firebase.
+            let provider = new  firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(result =>{                
+                    let token =  result.credential.accessToken;
+                    let user = result.user;
+                    s({
+                        user,
+                        token
+                    });
+                }).catch(err=>{
+                    f(err);
+            })
+        })
     }
 
     //const app = initializeApp(firebaseConfig);
